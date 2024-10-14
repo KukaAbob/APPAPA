@@ -8,8 +8,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-// Подключение к базе данных
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole(); // Логирование в консоль
+							  // Подключение к базе данных
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddSingleton<DataBaseService>(sp =>
 {
@@ -59,13 +60,14 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+//http://localhost:8080/swagger/index.html
 
 // Включаем Swagger только в разработке
 if (app.Environment.IsDevelopment())
 {
 	app.UseDeveloperExceptionPage();
-	app.UseSwagger();
-	app.UseSwaggerUI();
+	app.UseSwagger();               // Регистрация Swagger генератора
+	app.UseSwaggerUI();             // Регистрация Swagger UI
 }
 
 app.UseHttpsRedirection(); // Можно временно закомментировать, если окружение не поддерживает HTTPS
