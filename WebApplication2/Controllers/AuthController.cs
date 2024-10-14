@@ -38,9 +38,6 @@ public class AuthController : ControllerBase
 				return Unauthorized(new { Message = "Invalid UIN or password" });
 			}
 
-			// Логируем объект пользователя для отладки
-			_logger.LogInformation("Password from request: {Password}", request.Password);
-
 			// Проверяем, если пароль пуст или null
 			if (string.IsNullOrEmpty(user.Password))
 			{
@@ -48,9 +45,8 @@ public class AuthController : ControllerBase
 				return Unauthorized(new { Message = "Invalid UIN or password" });
 			}
 
-			// Сравниваем пароли
-			_logger.LogInformation("User found, validating password...");
-			if (request.Password != user.Password)
+			// Проверяем пароль
+			if (!BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
 			{
 				_logger.LogWarning("Invalid password for UIN: {UIN}", request.UIN);
 				return Unauthorized(new { Message = "Invalid UIN or password" });
@@ -64,8 +60,8 @@ public class AuthController : ControllerBase
 			{
 				Subject = new ClaimsIdentity(new Claim[]
 				{
-				new Claim(ClaimTypes.NameIdentifier, request.UIN),
-				new Claim(ClaimTypes.Name, request.UIN)
+					new Claim(ClaimTypes.NameIdentifier, request.UIN),
+					new Claim(ClaimTypes.Name, request.UIN)
 				}),
 				Expires = DateTime.UtcNow.AddHours(1),
 				SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
@@ -83,10 +79,6 @@ public class AuthController : ControllerBase
 		}
 	}
 
-
-
-
-
 	[HttpPost("register")]
 	public async Task<IActionResult> Register([FromBody] RegisterRequest request)
 	{
@@ -94,7 +86,10 @@ public class AuthController : ControllerBase
 		{
 			_logger.LogInformation("Attempting registration for UIN: {UIN}", request.UIN);
 
-			// Сохраняем пароль без хэширования
+			// Хэшируем пароль перед сохранением
+			var hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
+
+			// Сохраняем пользователя
 			await _dataBaseService.RegisterUserAsync(
 				request.Role,
 				request.LastName,
@@ -104,7 +99,7 @@ public class AuthController : ControllerBase
 				request.Email,  // Может быть null
 				request.PhoneNumber,  // Может быть null
 				request.IdCard,
-				request.Password,  // Сохраняем пароль в чистом виде
+				hashedPassword,  // Сохраняем хэшированный пароль
 				request.Group  // Может быть null
 			);
 
