@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using YourNamespace;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,7 +11,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole(); // Логирование в консоль
-							  // Подключение к базе данных
+
+// Подключение к базе данных
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddSingleton<DataBaseService>(sp =>
 {
@@ -18,7 +20,7 @@ builder.Services.AddSingleton<DataBaseService>(sp =>
 	return new DataBaseService(connectionString, logger);
 });
 
-// Настройка JWT с ключом из конфигурации или переменной окружения
+// Настройка JWT
 var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? "fdsgiuasfogewnrIURibnwfeszidscfqweqfxs");
 
 builder.Services.AddAuthentication(options =>
@@ -60,7 +62,6 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
-//http://localhost:8080/swagger/index.html
 
 // Включаем Swagger только в разработке
 if (app.Environment.IsDevelopment())
