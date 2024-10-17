@@ -49,3 +49,6 @@ C:\Users\Куаныш\Downloads\API_C--d1ce6d5b57f16d7ba2d804e0a8e2772fa29689dd\
 C:\Users\Куаныш\Downloads\API_C--d1ce6d5b57f16d7ba2d804e0a8e2772fa29689dd\WebApplication2\obj\Debug\net6.0\WebApplication2.pdb
 C:\Users\Куаныш\Downloads\API_C--d1ce6d5b57f16d7ba2d804e0a8e2772fa29689dd\WebApplication2\obj\Debug\net6.0\WebApplication2.genruntimeconfig.cache
 C:\Users\Куаныш\Downloads\API_C--d1ce6d5b57f16d7ba2d804e0a8e2772fa29689dd\WebApplication2\obj\Debug\net6.0\ref\WebApplication2.dll
+C:\Users\Куаныш\Downloads\API_C--d1ce6d5b57f16d7ba2d804e0a8e2772fa29689dd\WebApplication2\obj\Debug\net6.0\WebApplication2.sourcelink.json
+C:\Users\Куаныш\Downloads\API_C--d1ce6d5b57f16d7ba2d804e0a8e2772fa29689dd\WebApplication2\bin\Debug\net6.0\QRCoder.dll
+C:\Users\Куаныш\Downloads\API_C--d1ce6d5b57f16d7ba2d804e0a8e2772fa29689dd\WebApplication2\bin\Debug\net6.0\zxing.dll

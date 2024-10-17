@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
+using YourNamespace;
 
 [ApiController]
 [Route("api/[controller]")]
