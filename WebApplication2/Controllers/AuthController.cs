@@ -113,7 +113,85 @@ public class AuthController : ControllerBase
 			return StatusCode(500, new { Message = "Server error", Details = ex.Message });
 		}
 	}
+	[HttpPost("login/student")]
+	public async Task<IActionResult> LoginStudentAsync([FromBody] LoginRequest request)
+	{
+		if (string.IsNullOrEmpty(request.UIN) || string.IsNullOrEmpty(request.Password))
+		{
+			_logger.LogWarning("UIN or Password is null or empty.");
+			return BadRequest(new { Message = "UIN and Password are required" });
+		}
 
+		try
+		{
+			_logger.LogInformation("Validating student UIN: {UIN}", request.UIN);
+			var isValid = await _dataBaseService.ValidateStudentAsync(request.UIN, request.Password);
+
+			if (!isValid)
+			{
+				_logger.LogWarning("Invalid UIN or password for student: {UIN}", request.UIN);
+				return Unauthorized(new { Message = "Invalid UIN or password" });
+			}
+
+			// Генерация JWT токена (не изменяется)
+			var tokenString = GenerateJwtToken(request.UIN);
+			return Ok(new { Token = tokenString, Message = "Login successful." });
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error during student login for UIN: {UIN}", request.UIN);
+			return StatusCode(500, new { Message = "Internal server error", Details = ex.Message });
+		}
+	}
+
+	[HttpPost("login/teacher")]
+	public async Task<IActionResult> LoginTeacherAsync([FromBody] LoginRequest request)
+	{
+		if (string.IsNullOrEmpty(request.UIN) || string.IsNullOrEmpty(request.Password))
+		{
+			_logger.LogWarning("UIN or Password is null or empty.");
+			return BadRequest(new { Message = "UIN and Password are required" });
+		}
+
+		try
+		{
+			_logger.LogInformation("Validating teacher UIN: {UIN}", request.UIN);
+			var isValid = await _dataBaseService.ValidateTeacherAsync(request.UIN, request.Password);
+
+			if (!isValid)
+			{
+				_logger.LogWarning("Invalid UIN or password for teacher: {UIN}", request.UIN);
+				return Unauthorized(new { Message = "Invalid UIN or password" });
+			}
+
+			// Генерация JWT токена
+			var tokenString = GenerateJwtToken(request.UIN);
+			return Ok(new { Token = tokenString, Message = "Login successful." });
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error during teacher login for UIN: {UIN}", request.UIN);
+			return StatusCode(500, new { Message = "Internal server error", Details = ex.Message });
+		}
+	}
+
+	private string GenerateJwtToken(string uin)
+	{
+		var tokenHandler = new JwtSecurityTokenHandler();
+		var key = Encoding.ASCII.GetBytes("fdsgiuasfogewnrIURibnwfeszidscfqweqfxs");
+		var tokenDescriptor = new SecurityTokenDescriptor
+		{
+			Subject = new ClaimsIdentity(new Claim[]
+			{
+				new Claim(ClaimTypes.NameIdentifier, uin),
+				new Claim(ClaimTypes.Name, uin)
+			}),
+			Expires = DateTime.UtcNow.AddHours(1),
+			SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+		};
+		var token = tokenHandler.CreateToken(tokenDescriptor);
+		return tokenHandler.WriteToken(token);
+	}
 	// Классы запросов
 	public class RegisterRequest
 	{

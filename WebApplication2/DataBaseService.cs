@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using Dapper;
 using Npgsql;
 using Microsoft.Extensions.Logging;
+using System.Text;
+using System.Security.Cryptography;
 
 namespace YourNamespace
 {
@@ -82,69 +84,106 @@ namespace YourNamespace
 			}
 		}
 
-		public async Task<Lesson> GetLessonByIdAsync(string lessonId)
-		{
-			try
-			{
-				using (var connection = new NpgsqlConnection(_connectionString))
-				{
-					await connection.OpenAsync();
-					string query = @"SELECT lessonid, teacher, starttime AS StartTime, endtime AS EndTime, 
-							room, ""group"" AS Group, description, pincode AS PinCode, teacheruin AS TeacherUIN 
-							FROM lessons WHERE lessonid = @LessonId";
-
-					return await connection.QueryFirstOrDefaultAsync<Lesson>(query, new { LessonId = lessonId });
-				}
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine($"[ERROR] Failed to get lesson: {ex.Message}");
-				throw;
-			}
-		}
-
-		public async Task<IEnumerable<Lesson>> GetLessonsByTeacherUinAsync(string teacherUin)
-		{
-			try
-			{
-				using (var connection = new NpgsqlConnection(_connectionString))
-				{
-					await connection.OpenAsync();
-					string query = @"SELECT lessonid, teacher, starttime AS StartTime, endtime AS EndTime, 
-							room, ""group"" AS Group, description, pincode AS PinCode, teacheruin AS TeacherUIN 
-							FROM lessons WHERE teacheruin = @TeacherUIN";
-
-					return await connection.QueryAsync<Lesson>(query, new { TeacherUIN = teacherUin });
-				}
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine($"[ERROR] Failed to get lessons: {ex.Message}");
-				throw;
-			}
-		}
-
 		public async Task<IEnumerable<Lesson>> GetAllLessonsAsync()
 		{
+			var query = @"SELECT lessonid, teacher, starttime, endtime, room, ""group"", description, pincode, teacheruin 
+                          FROM lessons";
+
+			using (var connection = new NpgsqlConnection(_connectionString))
+			{
+				return await connection.QueryAsync<Lesson>(query);
+			}
+		}
+
+		// Получение уроков по UIN учителя
+		public async Task<IEnumerable<Lesson>> GetLessonsByTeacherUinAsync(string teacherUin)
+		{
+			var query = @"SELECT lessonid, teacher, starttime, endtime, room, ""group"", description, pincode, teacheruin 
+                          FROM lessons 
+                          WHERE teacheruin = @TeacherUin";
+
+			using (var connection = new NpgsqlConnection(_connectionString))
+			{
+				return await connection.QueryAsync<Lesson>(query, new { TeacherUin = teacherUin });
+			}
+		}
+
+		// Получение урока по ID
+		public async Task<Lesson> GetLessonByIdAsync(string lessonId)
+		{
+			var query = @"SELECT lessonid, teacher, starttime, endtime, room, ""group"", description, pincode, teacheruin 
+                          FROM lessons 
+                          WHERE lessonid = @LessonId";
+
+			using (var connection = new NpgsqlConnection(_connectionString))
+			{
+				return await connection.QueryFirstOrDefaultAsync<Lesson>(query, new { LessonId = lessonId });
+			}
+		}
+		public async Task<bool> ValidateStudentAsync(string uin, string password)
+		{
 			try
 			{
 				using (var connection = new NpgsqlConnection(_connectionString))
 				{
 					await connection.OpenAsync();
-					string query = @"SELECT lessonid, teacher, starttime AS StartTime, endtime AS EndTime, 
-							room, ""group"" AS Group, description, pincode AS PinCode, teacheruin AS TeacherUIN 
-							FROM lessons";
 
-					return await connection.QueryAsync<Lesson>(query);
+					string hashedPassword = HashPassword(password);  // Хэшируем пароль
+
+					string query = @"
+                    SELECT COUNT(1)
+                    FROM users u
+                    INNER JOIN roles r ON u.role_id = r.role_id
+                    WHERE u.uin = @UIN AND u.password_hash = @Password AND r.role_name = 'student'";
+
+					var parameters = new { UIN = uin, Password = hashedPassword };
+					return await connection.ExecuteScalarAsync<bool>(query, parameters);
 				}
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine($"[ERROR] Failed to get all lessons: {ex.Message}");
-				throw;
+				_logger.LogError(ex, "Ошибка при проверке учетных данных студента");
+				return false;
 			}
 		}
 
+		// Метод для проверки валидности преподавателя
+		public async Task<bool> ValidateTeacherAsync(string uin, string password)
+		{
+			try
+			{
+				using (var connection = new NpgsqlConnection(_connectionString))
+				{
+					await connection.OpenAsync();
+
+					string hashedPassword = HashPassword(password);  // Хэшируем пароль
+
+					string query = @"
+                    SELECT COUNT(1)
+                    FROM users u
+                    INNER JOIN roles r ON u.role_id = r.role_id
+                    WHERE u.uin = @UIN AND u.password_hash = @Password AND r.role_name = 'teacher'";
+
+					var parameters = new { UIN = uin, Password = hashedPassword };
+					return await connection.ExecuteScalarAsync<bool>(query, parameters);
+				}
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Ошибка при проверке учетных данных преподавателя");
+				return false;
+			}
+		}
+
+		// Метод для хэширования пароля (SHA-256)
+		private string HashPassword(string password)
+		{
+			using (var sha256 = SHA256.Create())
+			{
+				var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+				return Convert.ToBase64String(hashedBytes);
+			}
+		}
 
 		// Классы моделей
 		public class User
