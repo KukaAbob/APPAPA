@@ -111,7 +111,7 @@ namespace YourNamespace
 		// Получение урока по ID
 		public async Task<Lesson> GetLessonByIdAsync(string lessonId)
 		{
-			var query = @"SELECT lesson_id, teacher, starttime, endtime, room, ""group"", description, pincode, teacheruin 
+			var query = @"SELECT lessonid, teacher, starttime, endtime, room, ""group"", description, pincode, teacheruin 
                           FROM lessons 
                           WHERE lesson_id = @LessonId";
 
