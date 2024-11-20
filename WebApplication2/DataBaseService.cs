@@ -179,17 +179,5 @@ public class DataBaseService
         public int AudienceType { get; set; }
     }
 
-   public class Lesson
-{
-    public int LessonId { get; set; }
-    public string Teacher { get; set; }
-    public DateTime StartTime { get; set; }
-    public DateTime EndTime { get; set; }
-    public string Room { get; set; }
-    public string Group { get; set; }
-    public string Description { get; set; }
-    public int Pincode { get; set; }
-    public string TeacherUin { get; set; }
-}
 
 
