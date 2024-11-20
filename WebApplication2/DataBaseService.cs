@@ -19,58 +19,34 @@ namespace YourNamespace
         }
 
         // Получение пользователя по UIN
-        public async Task<User> GetUserByUinAsync(string uin)
-        {
-            var query = @"SELECT 
-                            role_id AS RoleId,
-                            last_name AS LastName,
-                            first_name AS FirstName,
-                            patronymic AS Patronymic,
-                            iin AS IIN,
-                            email,
-                            phone_number AS PhoneNumber,
-                            id_card AS IdCard,
-                            password
-                          FROM users 
-                          WHERE iin = @UIN";
+       public async Task<User> GetUserByUinAsync(string uin)
+{
+    var query = @"SELECT user_role AS Role, surname AS LastName, given_name AS FirstName, middle_name AS Patronymic, 
+                         unique_id AS UIN, email, contact_number AS PhoneNumber, 
+                         identity_card AS IdCard, password_hash AS Password, user_group AS Group 
+                  FROM users 
+                  WHERE unique_id = @UIN";
 
-            using (var connection = new NpgsqlConnection(_connectionString))
-            {
-                try
-                {
-                    return await connection.QueryFirstOrDefaultAsync<User>(query, new { UIN = uin });
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error fetching user by UIN.");
-                    throw;
-                }
-            }
-        }
+    using (var connection = new NpgsqlConnection(_connectionString))
+    {
+        var user = await connection.QueryFirstOrDefaultAsync<User>(query, new { UIN = uin });
+        return user;
+    }
+       }
 
         // Обновление пользователя
         public async Task UpdateUserAsync(string uin, string email, string phoneNumber, string idCard)
-        {
-            var query = @"UPDATE users 
-                          SET 
-                            email = @Email, 
-                            phone_number = @PhoneNumber, 
-                            id_card = @IdCard 
-                          WHERE iin = @UIN";
+{
+    var query = @"UPDATE users 
+                  SET email = @Email, contact_number = @PhoneNumber, identity_card = @IdCard 
+                  WHERE unique_id = @UIN";
 
-            using (var connection = new NpgsqlConnection(_connectionString))
-            {
-                try
-                {
-                    await connection.ExecuteAsync(query, new { UIN = uin, Email = email, PhoneNumber = phoneNumber, IdCard = idCard });
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error updating user.");
-                    throw;
-                }
-            }
-        }
+    using (var connection = new NpgsqlConnection(_connectionString))
+    {
+        await connection.ExecuteAsync(query, new { Email = email, PhoneNumber = phoneNumber, IdCard = idCard, UIN = uin });
+    }
+}
+
 
         // Получение списка всех аудиторий
         public async Task<IEnumerable<Audience>> GetAudiencesAsync()
@@ -101,18 +77,11 @@ namespace YourNamespace
         // Получение расписания уроков для определенной группы
         public async Task<IEnumerable<Lesson>> GetLessonsByGroupAsync(int groupId)
         {
-            var query = @"SELECT 
-                            lesson_id AS LessonId,
-                            teacher_id AS TeacherId,
-                            subject_id AS SubjectId,
-                            starttime,
-                            endtime,
-                            audience_id AS AudienceId,
-                            group_id AS GroupId,
-                            description,
-                            pincode
-                          FROM lessons 
-                          WHERE group_id = @GroupId";
+            var query = @"SELECT lesson_id AS LessonId, teacher_name AS Teacher, start_time AS StartTime, 
+                         end_time AS EndTime, room_number AS Room, 
+                         class_group AS Group, lesson_description AS Description, 
+                         access_code AS Pincode, teacher_unique_id AS TeacherUin 
+                  FROM lessons";
 
             using (var connection = new NpgsqlConnection(_connectionString))
             {
