@@ -99,16 +99,18 @@ public class LessonService
 	}
 }
 
- public class Lesson
+public class Lesson
 {
-    public int LessonId { get; set; }
-    public string Teacher { get; set; }
-    public DateTime StartTime { get; set; }
-    public DateTime EndTime { get; set; }
-    public string Room { get; set; }
-    public string Group { get; set; }
-    public string Description { get; set; }
-    public int Pincode { get; set; }
-    public string TeacherUin { get; set; }
+	public string LessonId { get; set; }
+	public string TeacherUIN { get; set; }
+	public string LastName { get; set; }   // Фамилия преподавателя
+	public string FirstName { get; set; }  // Имя преподавателя
+	public string Patronymic { get; set; } // Отчество преподавателя
+	public string Room { get; set; }
+	public string Group { get; set; }
+	public DateTime StartTime { get; set; }
+	public DateTime EndTime { get; set; }
+	public string Description { get; set; }
+	public string PinCode { get; set; }
+	public string QRCodeImage { get; set; } // Base64 image string for the QR code
 }
-
