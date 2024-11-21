@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 public class LessonService
 {
-	private readonly string _connectionString = "Host=junction.proxy.rlwy.net;Port=54498;Username=postgres;Password=lUGovqjjrjULCMgjstmuBzrHSZTpUQik;Database=railway";
+	private readonly string _connectionString = "Host=junction.proxy.rlwy.net;Port=57791;Database=railway;Username=postgres;Password=HybqsvFdFjjlwrVmedDTUzaGDjTxmhUT;";
 
 	// Получение всех уроков
 	public async Task<List<Lesson>> GetLessonsAsync()
