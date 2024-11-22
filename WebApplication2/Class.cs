@@ -14,7 +14,7 @@ namespace WebApplication2
 
 		public DatabaseService()
 		{
-			_connectionString = "Host=junction.proxy.rlwy.net;Port=54498;Username=postgres;Password=lUGovqjjrjULCMgjstmuBzrHSZTpUQik;Database=railway";
+			_connectionString = "Host=10.250.0.64;Port=5432;Username=postgres;Password=postgres;Database=attendance;";
 		}
 
 		// Регистрация пользователя
