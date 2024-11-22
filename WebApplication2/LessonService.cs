@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 public class LessonService
 {
-	private readonly string _connectionString = "Host=10.250.0.64;Port=5432;Username=AITU;Password=AITUCollege;Database=Attendance;";
+	private readonly string _connectionString = "Host=10.250.0.64;Port=5432;Username=AITU;Password=AITU;Database=Attendance;";
 
 	// Получение всех уроков
 	public async Task<List<Lesson>> GetLessonsAsync()
